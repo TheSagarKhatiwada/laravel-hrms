@@ -12,7 +12,8 @@ class RoleController extends Controller
      */
     public function index()
     {
-        //
+        $roles = Role::with('permissions')->get();
+        return view('roles.index', compact('roles'));
     }
 
     /**
@@ -20,7 +21,8 @@ class RoleController extends Controller
      */
     public function create()
     {
-        //
+        $permissions = \App\Models\Permission::all();
+        return view('roles.create', compact('permissions'));
     }
 
     /**
@@ -28,7 +30,16 @@ class RoleController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'name' => 'required|unique:roles,name',
+            'description' => 'nullable',
+            'permissions' => 'array',
+        ]);
+        $role = Role::create($validated);
+        if (isset($validated['permissions'])) {
+            $role->permissions()->sync($validated['permissions']);
+        }
+        return redirect()->route('roles.index');
     }
 
     /**
@@ -36,7 +47,8 @@ class RoleController extends Controller
      */
     public function show(Role $role)
     {
-        //
+        $role->load('permissions');
+        return view('roles.show', compact('role'));
     }
 
     /**
@@ -44,7 +56,9 @@ class RoleController extends Controller
      */
     public function edit(Role $role)
     {
-        //
+        $permissions = \App\Models\Permission::all();
+        $role->load('permissions');
+        return view('roles.edit', compact('role', 'permissions'));
     }
 
     /**
@@ -52,7 +66,16 @@ class RoleController extends Controller
      */
     public function update(Request $request, Role $role)
     {
-        //
+        $validated = $request->validate([
+            'name' => 'required|unique:roles,name,' . $role->id,
+            'description' => 'nullable',
+            'permissions' => 'array',
+        ]);
+        $role->update($validated);
+        if (isset($validated['permissions'])) {
+            $role->permissions()->sync($validated['permissions']);
+        }
+        return redirect()->route('roles.index');
     }
 
     /**
@@ -60,6 +83,7 @@ class RoleController extends Controller
      */
     public function destroy(Role $role)
     {
-        //
+        $role->delete();
+        return redirect()->route('roles.index');
     }
 }

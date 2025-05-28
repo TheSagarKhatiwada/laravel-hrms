@@ -12,7 +12,8 @@ class PermissionController extends Controller
      */
     public function index()
     {
-        //
+        $permissions = Permission::with('roles')->get();
+        return view('permissions.index', compact('permissions'));
     }
 
     /**
@@ -20,7 +21,8 @@ class PermissionController extends Controller
      */
     public function create()
     {
-        //
+        $roles = \App\Models\Role::all();
+        return view('permissions.create', compact('roles'));
     }
 
     /**
@@ -28,7 +30,16 @@ class PermissionController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'name' => 'required|unique:permissions,name',
+            'description' => 'nullable',
+            'roles' => 'array',
+        ]);
+        $permission = Permission::create($validated);
+        if (isset($validated['roles'])) {
+            $permission->roles()->sync($validated['roles']);
+        }
+        return redirect()->route('permissions.index');
     }
 
     /**
@@ -36,7 +47,8 @@ class PermissionController extends Controller
      */
     public function show(Permission $permission)
     {
-        //
+        $permission->load('roles');
+        return view('permissions.show', compact('permission'));
     }
 
     /**
@@ -44,7 +56,9 @@ class PermissionController extends Controller
      */
     public function edit(Permission $permission)
     {
-        //
+        $roles = \App\Models\Role::all();
+        $permission->load('roles');
+        return view('permissions.edit', compact('permission', 'roles'));
     }
 
     /**
@@ -52,7 +66,16 @@ class PermissionController extends Controller
      */
     public function update(Request $request, Permission $permission)
     {
-        //
+        $validated = $request->validate([
+            'name' => 'required|unique:permissions,name,' . $permission->id,
+            'description' => 'nullable',
+            'roles' => 'array',
+        ]);
+        $permission->update($validated);
+        if (isset($validated['roles'])) {
+            $permission->roles()->sync($validated['roles']);
+        }
+        return redirect()->route('permissions.index');
     }
 
     /**
@@ -60,6 +83,7 @@ class PermissionController extends Controller
      */
     public function destroy(Permission $permission)
     {
-        //
+        $permission->delete();
+        return redirect()->route('permissions.index');
     }
 }

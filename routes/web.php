@@ -47,5 +47,7 @@ Route::resource('leaves', App\Http\Controllers\LeaveController::class);
 Route::resource('holidays', App\Http\Controllers\HolidayController::class);
 Route::resource('attendances', App\Http\Controllers\AttendanceController::class);
 Route::resource('payrolls', App\Http\Controllers\PayrollController::class);
+Route::resource('roles', App\Http\Controllers\RoleController::class);
+Route::resource('permissions', App\Http\Controllers\PermissionController::class);
 
 require __DIR__.'/auth.php';
