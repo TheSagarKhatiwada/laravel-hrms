@@ -36,7 +36,21 @@ class HolidayController extends Controller
             'type' => 'nullable',
             'description' => 'nullable',
         ]);
-        Holiday::create($validated);
+        
+        $holiday = Holiday::create($validated);
+        
+        // Auto-convert AD to BS if only AD date is provided
+        if (!$validated['nepali_date'] && $validated['date']) {
+            $holiday->convertAndSetNepaliDate('date', 'nepali_date');
+            $holiday->save();
+        }
+        
+        // Auto-convert BS to AD if only BS date is provided
+        if ($validated['nepali_date'] && !$validated['date']) {
+            $holiday->convertAndSetAdDate('nepali_date', 'date');
+            $holiday->save();
+        }
+        
         return redirect()->route('holidays.index');
     }
 
@@ -70,7 +84,21 @@ class HolidayController extends Controller
             'type' => 'nullable',
             'description' => 'nullable',
         ]);
+        
         $holiday->update($validated);
+        
+        // Auto-convert AD to BS if only AD date is provided
+        if (!$validated['nepali_date'] && $validated['date']) {
+            $holiday->convertAndSetNepaliDate('date', 'nepali_date');
+            $holiday->save();
+        }
+        
+        // Auto-convert BS to AD if only BS date is provided
+        if ($validated['nepali_date'] && !$validated['date']) {
+            $holiday->convertAndSetAdDate('nepali_date', 'date');
+            $holiday->save();
+        }
+        
         return redirect()->route('holidays.index');
     }
 

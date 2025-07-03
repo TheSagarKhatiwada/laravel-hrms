@@ -33,12 +33,26 @@ class AttendanceController extends Controller
         $validated = $request->validate([
             'employee_id' => 'required|exists:employees,id',
             'date' => 'required|date',
+            'nepali_date' => 'nullable',
             'check_in' => 'nullable',
             'check_out' => 'nullable',
             'status' => 'required',
             'remarks' => 'nullable',
         ]);
-        Attendance::create($validated);
+        
+        $attendance = Attendance::create($validated);
+        
+        // Auto-convert dates
+        if (!$validated['nepali_date'] && $validated['date']) {
+            $attendance->convertAndSetNepaliDate('date', 'nepali_date');
+            $attendance->save();
+        }
+        
+        if ($validated['nepali_date'] && !$validated['date']) {
+            $attendance->convertAndSetAdDate('nepali_date', 'date');
+            $attendance->save();
+        }
+        
         return redirect()->route('attendances.index');
     }
 
@@ -69,12 +83,26 @@ class AttendanceController extends Controller
         $validated = $request->validate([
             'employee_id' => 'required|exists:employees,id',
             'date' => 'required|date',
+            'nepali_date' => 'nullable',
             'check_in' => 'nullable',
             'check_out' => 'nullable',
             'status' => 'required',
             'remarks' => 'nullable',
         ]);
+        
         $attendance->update($validated);
+        
+        // Auto-convert dates
+        if (!$validated['nepali_date'] && $validated['date']) {
+            $attendance->convertAndSetNepaliDate('date', 'nepali_date');
+            $attendance->save();
+        }
+        
+        if ($validated['nepali_date'] && !$validated['date']) {
+            $attendance->convertAndSetAdDate('nepali_date', 'date');
+            $attendance->save();
+        }
+        
         return redirect()->route('attendances.index');
     }
 
