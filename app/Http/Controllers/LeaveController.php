@@ -35,11 +35,35 @@ class LeaveController extends Controller
             'leave_type' => 'required',
             'start_date' => 'required|date',
             'end_date' => 'required|date',
+            'nepali_start_date' => 'nullable',
+            'nepali_end_date' => 'nullable',
             'reason' => 'nullable',
         ]);
+        
         $validated['total_days'] = (new \DateTime($validated['end_date']))->diff(new \DateTime($validated['start_date']))->days + 1;
         $validated['status'] = 'pending';
-        Leave::create($validated);
+        
+        $leave = Leave::create($validated);
+        
+        // Auto-convert dates
+        if (!$validated['nepali_start_date'] && $validated['start_date']) {
+            $leave->convertAndSetNepaliDate('start_date', 'nepali_start_date');
+        }
+        
+        if (!$validated['nepali_end_date'] && $validated['end_date']) {
+            $leave->convertAndSetNepaliDate('end_date', 'nepali_end_date');
+        }
+        
+        if ($validated['nepali_start_date'] && !$validated['start_date']) {
+            $leave->convertAndSetAdDate('nepali_start_date', 'start_date');
+        }
+        
+        if ($validated['nepali_end_date'] && !$validated['end_date']) {
+            $leave->convertAndSetAdDate('nepali_end_date', 'end_date');
+        }
+        
+        $leave->save();
+        
         return redirect()->route('leaves.index');
     }
 
@@ -72,10 +96,34 @@ class LeaveController extends Controller
             'leave_type' => 'required',
             'start_date' => 'required|date',
             'end_date' => 'required|date',
+            'nepali_start_date' => 'nullable',
+            'nepali_end_date' => 'nullable',
             'reason' => 'nullable',
         ]);
+        
         $validated['total_days'] = (new \DateTime($validated['end_date']))->diff(new \DateTime($validated['start_date']))->days + 1;
+        
         $leave->update($validated);
+        
+        // Auto-convert dates
+        if (!$validated['nepali_start_date'] && $validated['start_date']) {
+            $leave->convertAndSetNepaliDate('start_date', 'nepali_start_date');
+        }
+        
+        if (!$validated['nepali_end_date'] && $validated['end_date']) {
+            $leave->convertAndSetNepaliDate('end_date', 'nepali_end_date');
+        }
+        
+        if ($validated['nepali_start_date'] && !$validated['start_date']) {
+            $leave->convertAndSetAdDate('nepali_start_date', 'start_date');
+        }
+        
+        if ($validated['nepali_end_date'] && !$validated['end_date']) {
+            $leave->convertAndSetAdDate('nepali_end_date', 'end_date');
+        }
+        
+        $leave->save();
+        
         return redirect()->route('leaves.index');
     }
 

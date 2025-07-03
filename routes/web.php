@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Api\DateConversionController;
 use App\Models\Employee;
 use App\Models\Asset;
 use App\Models\Leave;
@@ -38,6 +39,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+// API routes for date conversion
+Route::prefix('api')->group(function () {
+    Route::post('/convert-date/ad-to-bs', [DateConversionController::class, 'adToBs']);
+    Route::post('/convert-date/bs-to-ad', [DateConversionController::class, 'bsToAd']);
+    Route::get('/current-date', [DateConversionController::class, 'getCurrentDate']);
 });
 
 // Add resource routes for all modules
